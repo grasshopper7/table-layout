@@ -19,8 +19,8 @@ import rst.pdfbox.layout.util.Enumerators.RomanEnumerator;
  * <tr><td>Roman</td><td align="center">I</td><td align="center">.</td></tr>
  * <tr><td>Roman Lower Case</td><td align="center">i</td><td align="center">.</td></tr>
  * <tr><td>Alphabetic</td><td align="center">A</td><td align="center">)</td></tr>
- * <tr><td>Alphabetic Lower Case</td><td align="center">a</td><td align="center">)</td></tr>
- * </table>
+ * <tr><td>Alphabetic Lower Case</td><td align="center">a</td><td align="center">)</td></tr></table>
+ * 
  */
 public class EnumeratorFactory {
 
