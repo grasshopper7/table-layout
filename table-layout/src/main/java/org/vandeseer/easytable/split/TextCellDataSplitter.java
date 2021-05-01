@@ -5,15 +5,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.vandeseer.easytable.structure.cell.AbstractCell;
 import org.vandeseer.easytable.structure.cell.TextCell;
 import org.vandeseer.easytable.util.PdfUtil;
 
-import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 
-@Builder
+@SuperBuilder
 public class TextCellDataSplitter implements CellDataSplitter {
 
-	private TextCell cell;
+	protected TextCell cell;
 
 	private float availableHeight;
 
@@ -66,8 +67,7 @@ public class TextCellDataSplitter implements CellDataSplitter {
 	private void updateSamePageCellData(List<String> lines, SplitCellData data, int count, float lineHeight) {
 		String initialText = lines.subList(0, count).stream().collect(Collectors.joining(" "));
 
-		data.setSamePageCell(TextCell.builder().settings(cell.getSettings()).colSpan(cell.getColSpan())
-				.rowSpan(cell.getRowSpan()).text(initialText).width(cell.getWidth()).build());
+		data.setSamePageCell(createCell(initialText));
 		if (count == 0)
 			data.setSamePageCellPresent(false);
 		data.setSamePageCellHeight(cell.getVerticalPadding()
@@ -77,12 +77,16 @@ public class TextCellDataSplitter implements CellDataSplitter {
 	private void updateNextPageCellData(List<String> lines, SplitCellData data, int count, float lineHeight) {
 		String lastText = lines.subList(count, lines.size()).stream().collect(Collectors.joining(" "));
 
-		data.setNextPageCell(TextCell.builder().settings(cell.getSettings()).colSpan(cell.getColSpan())
-				.rowSpan(cell.getRowSpan()).text(lastText).width(cell.getWidth()).build());
+		data.setNextPageCell(createCell(lastText));
 		if (count == lines.size())
 			data.setNextPageCellPresent(false);
 		data.setNextPageCellHeight(cell.getVerticalPadding() + ((lines.size() - count) > 0
 				? ((lines.size() - count) * lineHeight) + ((lines.size() - count - 1) * lineHeight * lineSpacing)
 				: 0f));
+	}
+
+	protected AbstractCell createCell(String text) {
+		return TextCell.builder().settings(cell.getSettings()).colSpan(cell.getColSpan()).rowSpan(cell.getRowSpan())
+				.text(text).width(cell.getWidth()).build();
 	}
 }
