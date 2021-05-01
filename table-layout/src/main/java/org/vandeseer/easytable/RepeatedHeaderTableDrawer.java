@@ -1,14 +1,18 @@
 package org.vandeseer.easytable;
 
-import lombok.Builder;
-import lombok.experimental.SuperBuilder;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.vandeseer.easytable.structure.Row;
-
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.function.Supplier;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.vandeseer.easytable.split.MinimumHeightSplitCellException;
+import org.vandeseer.easytable.split.SplitCellData;
+import org.vandeseer.easytable.structure.Row;
+import org.vandeseer.easytable.structure.cell.AbstractCell;
+
+import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 public class RepeatedHeaderTableDrawer extends TableDrawer {
@@ -40,12 +44,38 @@ public class RepeatedHeaderTableDrawer extends TableDrawer {
 	@Override
 	protected void determinePageToStartTable(float yOffsetOnNewPage) {
 		float minimumRowsToFitHeight = 0;
-		int minimumRowsToFit = table.getRows().size() > numberOfRowsToRepeat
-				? numberOfRowsToRepeat + 1
-				: numberOfRowsToRepeat;
 
-		for (final Row row : table.getRows().subList(0, minimumRowsToFit))
-			minimumRowsToFitHeight += row.getHeight();
+		if (splitRow) {
+			for (final Row row : table.getRows().subList(0, numberOfRowsToRepeat)) {
+				minimumRowsToFitHeight += row.getHeight();
+			}
+
+			Row canFitSplitRow = table.getRows().get(numberOfRowsToRepeat);
+
+			float availableHeight = (startY - minimumRowsToFitHeight) - endY;
+			float splitRowHeight = 0f;
+
+			for (AbstractCell cell : canFitSplitRow.getCells()) {
+				SplitCellData data = null;
+
+				try {
+					data = cell.splitCell(availableHeight);
+					if (data.isSamePageCellPresent() && data.getSamePageCellHeight() > splitRowHeight)
+						splitRowHeight = data.getSamePageCellHeight();
+				} catch (MinimumHeightSplitCellException | UnsupportedOperationException e) {
+					if (cell.getHeight() > splitRowHeight)
+						splitRowHeight = cell.getHeight();
+				}
+			}
+			minimumRowsToFitHeight += splitRowHeight;
+
+		} else {
+			int minimumRowsToFit = table.getRows().size() > numberOfRowsToRepeat ? numberOfRowsToRepeat + 1
+					: numberOfRowsToRepeat;
+			for (final Row row : table.getRows().subList(0, minimumRowsToFit)) {
+				minimumRowsToFitHeight += row.getHeight();
+			}
+		}
 
 		if (startY - minimumRowsToFitHeight < endY) {
 			startY = yOffsetOnNewPage + calculateHeightForFirstRows();
