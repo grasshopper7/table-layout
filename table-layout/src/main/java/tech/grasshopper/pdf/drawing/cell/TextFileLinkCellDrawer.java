@@ -18,10 +18,18 @@ import tech.grasshopper.pdf.structure.cell.TextFileLinkCell;
 public class TextFileLinkCellDrawer<T extends TextFileLinkCell> extends TextCellDrawer<TextFileLinkCell> {
 
 	protected List<FileAnnotation> annotations;
+	protected float pinWidth;
+	protected float pinHeight;
+	protected float leftGapPin;
+	protected float rightGapPin;
 
 	public TextFileLinkCellDrawer(T cell) {
 		this.cell = cell;
 		this.annotations = cell.getAnnotations();
+		this.pinWidth = cell.getPinWidth();
+		this.pinHeight = cell.getPinHeight();
+		this.leftGapPin = cell.getLeftGapPin();
+		this.rightGapPin = cell.getRightGapPin();
 	}
 
 	@Override
@@ -35,22 +43,17 @@ public class TextFileLinkCellDrawer<T extends TextFileLinkCell> extends TextCell
 
 		yOffset -= calculateYOffset(currentFont, currentFontSize, 0);
 
-		float dataGap = 20f;
-
 		for (FileAnnotation fileAnnot : annotations) {
 			updateAnnotation(fileAnnot, drawingContext, xOffset, yOffset);
 
-			xOffset += dataGap;
+			xOffset += pinWidth + leftGapPin;
 			drawText(drawingContext, PositionedStyledText.builder().x(xOffset).y(yOffset).text(fileAnnot.getText())
 					.font(currentFont).fontSize(currentFontSize).color(cell.getTextColor()).build());
-			xOffset += PdfUtil.getStringWidth(fileAnnot.getText(), currentFont, currentFontSize);
+			xOffset += PdfUtil.getStringWidth(fileAnnot.getText(), currentFont, currentFontSize) + rightGapPin;
 		}
 	}
 
 	private void updateAnnotation(FileAnnotation annotation, DrawingContext drawingContext, float x, float y) {
-		float pinWidth = 10f;
-		float pinHeight = 10f;
-
 		PDRectangle rectangle = new PDRectangle(x, y, pinWidth, pinHeight);
 		annotation.setRectangle(rectangle);
 		annotation.setPage(drawingContext.getPage());
