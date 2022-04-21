@@ -40,7 +40,6 @@ public class TableRowSplitter {
 	}
 
 	public Table splitTableRows() {
-
 		// Error out if source table contains cells with row span greater than 1.
 		checkForRowSpanCells();
 		targetTableBuilder = Table.builder().settings(sourceTable.getSettings());
@@ -48,8 +47,7 @@ public class TableRowSplitter {
 		sourceTable.getColumns().forEach(col -> targetTableBuilder.addColumnOfWidth(col.getWidth()));
 
 		sourceTable.getRows().forEach(row -> {
-
-			if (!doesRowFitInPage(row)) {
+			if (!doesRowFitInAvailableSpaceInPage(row)) {
 				targetTableBuilder.addRow(row);
 				currentY -= row.getHeight();
 			} else {
@@ -62,17 +60,27 @@ public class TableRowSplitter {
 
 	private void splitRow(Row row) {
 
-		RowBuilder initialRowBuilder = Row.builder().settings(row.getSettings());
-		RowBuilder nextRowBuilder = Row.builder().settings(row.getSettings());
-
 		List<SplitCellData> splitData = new ArrayList<>();
+		List<AbstractCell> cells = row.getCells();
+
 		try {
-			row.getCells().forEach(cell -> splitData.add(cell.splitCell(currentY - pageEndY)));
-		} catch (MinimumHeightSplitCellException | UnsupportedOperationException e) {
+			for (int i = 0; i < cells.size(); i++)
+				splitData.add(cells.get(i).splitCell(currentY - pageEndY));
+
+		} catch (UnsupportedOperationException e) {
 			targetTableBuilder.addRow(row);
 			currentY = pageStartY - row.getHeight();
 			return;
+		} catch (MinimumHeightSplitCellException e) {
+			currentY = pageStartY;
+
+			splitData = new ArrayList<>();
+			for (int i = 0; i < cells.size(); i++)
+				splitData.add(cells.get(i).splitCell(currentY - pageEndY));
 		}
+
+		RowBuilder initialRowBuilder = Row.builder().settings(row.getSettings());
+		RowBuilder nextRowBuilder = Row.builder().settings(row.getSettings());
 
 		if (splitData.stream().map(SplitCellData::isSamePageCellPresent).filter(d -> d == true).count() > 0) {
 			splitData.forEach(d -> {
@@ -91,7 +99,7 @@ public class TableRowSplitter {
 		}
 	}
 
-	private boolean doesRowFitInPage(Row row) {
+	private boolean doesRowFitInAvailableSpaceInPage(Row row) {
 		return currentY - getHighestCellOf(row) < pageEndY;
 	}
 

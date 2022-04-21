@@ -111,9 +111,12 @@ public class TableDrawer {
 		int lastRowOnPage = 0;
 
 		for (final Row row : table.getRows()) {
-			if (isRowTooHighToBeDrawnOnPage(row, yOffsetOnNewPage)) {
-				throw new RowIsTooHighException("There is a row that is too high to be drawn on a single page");
-			}
+			//Commented check so atleast 'half-baked' report is generated
+			/*
+			 * if (isRowTooHighToBeDrawnOnPage(row, yOffsetOnNewPage)) { throw new
+			 * RowIsTooHighException("There is a row that is too high to be drawn on a single page"
+			 * ); }
+			 */
 
 			if (isNotDrawableOnPage(y, row)) {
 				dataForPages.add(new PageData(firstRowOnPage, lastRowOnPage));

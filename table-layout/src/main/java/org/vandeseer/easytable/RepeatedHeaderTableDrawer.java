@@ -60,11 +60,12 @@ public class RepeatedHeaderTableDrawer extends TableDrawer {
 
 				try {
 					data = cell.splitCell(availableHeight);
-					if (data.isSamePageCellPresent() && data.getSamePageCellHeight() > splitRowHeight)
-						splitRowHeight = data.getSamePageCellHeight();
+					if (data.isSamePageCellPresent() && ((data.getSamePageCellHeight()
+							+ data.getSamePageCell().getVerticalPadding()) > splitRowHeight))
+						splitRowHeight = data.getSamePageCellHeight() + data.getSamePageCell().getVerticalPadding();
 				} catch (MinimumHeightSplitCellException | UnsupportedOperationException e) {
 					if (cell.getHeight() > splitRowHeight)
-						splitRowHeight = cell.getHeight();
+						splitRowHeight = cell.getHeight() + cell.getVerticalPadding();
 				}
 			}
 			minimumRowsToFitHeight += splitRowHeight;
