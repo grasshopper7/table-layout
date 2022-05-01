@@ -46,29 +46,28 @@ public class RepeatedHeaderTableDrawer extends TableDrawer {
 		float minimumRowsToFitHeight = 0;
 
 		if (splitRow) {
-			for (final Row row : table.getRows().subList(0, numberOfRowsToRepeat)) {
-				minimumRowsToFitHeight += row.getHeight();
-			}
-
-			Row canFitSplitRow = table.getRows().get(numberOfRowsToRepeat);
-
-			float availableHeight = (startY - minimumRowsToFitHeight) - endY;
-			float splitRowHeight = 0f;
-
-			for (AbstractCell cell : canFitSplitRow.getCells()) {
-				SplitCellData data = null;
-
-				try {
-					data = cell.splitCell(availableHeight);
-					if (data.isSamePageCellPresent() && ((data.getSamePageCellHeight()
-							+ data.getSamePageCell().getVerticalPadding()) > splitRowHeight))
-						splitRowHeight = data.getSamePageCellHeight() + data.getSamePageCell().getVerticalPadding();
-				} catch (MinimumHeightSplitCellException | UnsupportedOperationException e) {
-					if (cell.getHeight() > splitRowHeight)
-						splitRowHeight = cell.getHeight() + cell.getVerticalPadding();
+			if (numberOfRowsToRepeat > 0) {
+				for (final Row row : table.getRows().subList(0, numberOfRowsToRepeat)) {
+					minimumRowsToFitHeight += row.getHeight();
 				}
+				Row canFitSplitRow = table.getRows().get(numberOfRowsToRepeat);
+				float availableHeight = (startY - minimumRowsToFitHeight) - endY;
+				float splitRowHeight = 0f;
+				for (AbstractCell cell : canFitSplitRow.getCells()) {
+					SplitCellData data = null;
+
+					try {
+						data = cell.splitCell(availableHeight);
+						if (data.isSamePageCellPresent() && ((data.getSamePageCellHeight()
+								+ data.getSamePageCell().getVerticalPadding()) > splitRowHeight))
+							splitRowHeight = data.getSamePageCellHeight() + data.getSamePageCell().getVerticalPadding();
+					} catch (MinimumHeightSplitCellException | UnsupportedOperationException e) {
+						if (cell.getHeight() > splitRowHeight)
+							splitRowHeight = cell.getHeight() + cell.getVerticalPadding();
+					}
+				}
+				minimumRowsToFitHeight += splitRowHeight;
 			}
-			minimumRowsToFitHeight += splitRowHeight;
 
 		} else {
 			int minimumRowsToFit = table.getRows().size() > numberOfRowsToRepeat ? numberOfRowsToRepeat + 1

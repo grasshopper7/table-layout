@@ -64,7 +64,7 @@ public class TableRowSplitter {
 		List<AbstractCell> cells = row.getCells();
 
 		try {
-			for (int i = 0; i < cells.size(); i++)
+			for (int i = 0; i < cells.size(); i++) 
 				splitData.add(cells.get(i).splitCell(currentY - pageEndY));
 
 		} catch (UnsupportedOperationException e) {
@@ -75,8 +75,15 @@ public class TableRowSplitter {
 			currentY = pageStartY;
 
 			splitData = new ArrayList<>();
-			for (int i = 0; i < cells.size(); i++)
-				splitData.add(cells.get(i).splitCell(currentY - pageEndY));
+			for (int i = 0; i < cells.size(); i++) {
+				try {
+					splitData.add(cells.get(i).splitCell(currentY - pageEndY));
+				} catch (UnsupportedOperationException uoe) {
+					targetTableBuilder.addRow(row);
+					currentY = pageStartY - row.getHeight();
+					return;
+				}
+			}
 		}
 
 		RowBuilder initialRowBuilder = Row.builder().settings(row.getSettings());

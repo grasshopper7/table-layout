@@ -51,8 +51,8 @@ public class ParagraphCellDataSplitter implements CellDataSplitter {
 		SplitCellData data = new SplitCellData();
 
 		// Simpler to use blank TextCell
-		data.setSamePageCell(TextCell.builder().text("").build());
-		data.setNextPageCell(TextCell.builder().text("").build());
+		data.setSamePageCell(TextCell.builder().text("").colSpan(cell.getColSpan()).rowSpan(cell.getRowSpan()).build());
+		data.setNextPageCell(TextCell.builder().text("").colSpan(cell.getColSpan()).rowSpan(cell.getRowSpan()).build());
 
 		data.setSamePageCellPresent(true);
 		data.setNextPageCellPresent(false);
@@ -70,7 +70,7 @@ public class ParagraphCellDataSplitter implements CellDataSplitter {
 		headParagraph.setWrappedParagraph(headPara);
 
 		ParagraphCell headCell = ParagraphCell.builder().paragraph(headParagraph).settings(cell.getSettings())
-				.lineSpacing(lineSpacing).build();
+				.colSpan(cell.getColSpan()).rowSpan(cell.getRowSpan()).lineSpacing(lineSpacing).build();
 
 		data.setSamePageCell(headCell);
 		data.setSamePageCellPresent(!headPara.isEmpty());
@@ -84,7 +84,7 @@ public class ParagraphCellDataSplitter implements CellDataSplitter {
 		tailParagraph.setWrappedParagraph(tailPara);
 
 		ParagraphCell tailCell = ParagraphCell.builder().paragraph(tailParagraph).settings(cell.getSettings())
-				.lineSpacing(lineSpacing).build();
+				.colSpan(cell.getColSpan()).rowSpan(cell.getRowSpan()).lineSpacing(lineSpacing).build();
 
 		data.setNextPageCell(tailCell);
 		data.setNextPageCellPresent(!tailPara.isEmpty());
